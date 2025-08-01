@@ -1,0 +1,75 @@
+# Variables de entorno
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Tokens y credenciales sensibles
+*.key
+*.pem
+**/secrets/
+**/config/local*
+
+# Archivos de Supabase locales
+.supabase/
+supabase/.env
+supabase/config.toml
+supabase/.branches/
+**/._current_branch
+
+# Dependencias de Node.js (si se usan)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependencias de Deno
+.deno/
+deno.lock
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDEs y editores
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+
+# Archivos temporales
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Archivos de testing y desarrollo local
+test-results/
+coverage/
+.nyc_output/
+
+# Archivos de backup
+*.bak
+*.backup
+
+# Archivos compilados o generados
+dist/
+build/
+out/
+
+# Cache
+.cache/
+*.cache
+
+# Archivos específicos del proyecto
+**/LOCAL_TESTING.md
+**/dev-env.ts
+test.ps1
+test.sh
