@@ -1,6 +1,12 @@
 # Checklist de Despliegue - PersonaNatural Edge Function
 
-## ✅ Archivos de Producción
+## ✅ Archi### 🔄 Próximos pasos
+1. Inicializar repositorio Git: `git init`
+2. Agregar archivos: `git add .`
+3. Commit inicial: `git commit -m "Initial commit: PersonaNatural API"`
+4. Crear repositorio en GitHub
+5. Agregar remote: `git remote add origin <tu-repo-url>`
+6. Push: `git push -u origin master`Producción
 - [x] `index.ts` - Punto de entrada principal
 - [x] `factory.ts` - Inyección de dependencias
 - [x] `deno.json` - Configuración de Deno
@@ -74,4 +80,4 @@ curl "https://tu-proyecto.supabase.co/functions/v1/getPersonaNatural?dni=1234567
 3. Commit inicial: `git commit -m "Initial commit: PersonaNatural API"`
 4. Crear repositorio en GitHub
 5. Agregar remote: `git remote add origin <tu-repo-url>`
-6. Push: `git push -u origin master`
+6. Push: `git push -u origin main`

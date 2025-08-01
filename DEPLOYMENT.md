@@ -147,7 +147,7 @@ Para actualizar la función:
 # Hacer cambios al código
 git pull origin master
 
-# Redesplegar
+# Redesplegar manualmente (recomendado para evitar gastos)
 supabase functions deploy getPersonaNatural
 ```
 
