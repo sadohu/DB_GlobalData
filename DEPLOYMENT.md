@@ -7,7 +7,18 @@
 Configura estas variables en Supabase Dashboard > Settings > Edge Functions:
 
 ```
-SUPABASE_URL=https://tu-proyecto.supabase.co
+SUPABAS### Actualizaciones
+
+Para actualizar las funciones:
+
+```bash
+# Hacer cambios al código
+git pull origin master
+
+# Redesplegar manualmente (recomendado para evitar gastos)
+supabase functions deploy getPersonaNatural
+supabase functions deploy getPersonaJuridica
+```://tu-proyecto.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key_real
 APIS_PERU_TOKEN=tu_token_apis_peru_real
 ```
@@ -67,27 +78,66 @@ CREATE TABLE IF NOT EXISTS persona_natural (
     actualizado_por UUID DEFAULT '00000000-0000-0000-0000-000000000000'
 );
 
--- Crear índices
+-- Crear tabla persona_juridica
+CREATE TABLE IF NOT EXISTS persona_juridica (
+    id SERIAL PRIMARY KEY,
+    razon_social VARCHAR(200) NOT NULL,
+    nombre_comercial VARCHAR(200),
+    tipo_documento VARCHAR(10) DEFAULT 'RUC',
+    numero_documento VARCHAR(20) UNIQUE NOT NULL,
+    fecha_constitucion DATE,
+    tipo_empresa VARCHAR(50),
+    actividad_economica VARCHAR(300),
+    representante_legal VARCHAR(200),
+    correo VARCHAR(100),
+    telefono VARCHAR(20),
+    direccion_fiscal VARCHAR(500),
+    ubigeo VARCHAR(10),
+    pagina_web VARCHAR(200),
+    estado_legal VARCHAR(20) DEFAULT 'ACTIVO',
+    fecha_creacion TIMESTAMP DEFAULT NOW(),
+    fecha_actualizacion TIMESTAMP DEFAULT NOW(),
+    creado_por UUID DEFAULT '00000000-0000-0000-0000-000000000000',
+    actualizado_por UUID DEFAULT '00000000-0000-0000-0000-000000000000'
+);
+
+-- Crear índices persona_natural
 CREATE INDEX IF NOT EXISTS idx_persona_natural_dni ON persona_natural(numero_documento);
 CREATE INDEX IF NOT EXISTS idx_persona_natural_nombres ON persona_natural(nombres, apellido_paterno, apellido_materno);
 
+-- Crear índices persona_juridica
+CREATE INDEX IF NOT EXISTS idx_persona_juridica_ruc ON persona_juridica(numero_documento);
+CREATE INDEX IF NOT EXISTS idx_persona_juridica_razon_social ON persona_juridica(razon_social);
+CREATE INDEX IF NOT EXISTS idx_persona_juridica_estado ON persona_juridica(estado_legal);
+
 -- Configurar Row Level Security (RLS)
 ALTER TABLE persona_natural ENABLE ROW LEVEL SECURITY;
+ALTER TABLE persona_juridica ENABLE ROW LEVEL SECURITY;
 
--- Política para permitir lectura a usuarios autenticados
+-- Políticas para persona_natural
 CREATE POLICY "Permitir lectura a usuarios autenticados" ON persona_natural
     FOR SELECT USING (auth.role() = 'authenticated');
 
--- Política para permitir inserción a usuarios autenticados
 CREATE POLICY "Permitir inserción a usuarios autenticados" ON persona_natural
     FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
--- Política para permitir actualización a usuarios autenticados
 CREATE POLICY "Permitir actualización a usuarios autenticados" ON persona_natural
     FOR UPDATE USING (auth.role() = 'authenticated');
 
--- Política para permitir eliminación a usuarios autenticados
 CREATE POLICY "Permitir eliminación a usuarios autenticados" ON persona_natural
+    FOR DELETE USING (auth.role() = 'authenticated');
+
+-- Políticas para persona_juridica
+CREATE POLICY "Permitir lectura a usuarios autenticados" ON persona_juridica
+    FOR SELECT USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Permitir inserción a usuarios autenticados" ON persona_juridica
+    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+CREATE POLICY "Permitir actualización a usuarios autenticados" ON persona_juridica
+    FOR UPDATE USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Permitir eliminación a usuarios autenticados" ON persona_juridica
     FOR DELETE USING (auth.role() = 'authenticated');
 ```
 
@@ -100,17 +150,25 @@ En Supabase Dashboard:
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `APIS_PERU_TOKEN`
 
-### 5. Desplegar Edge Function
+### 5. Desplegar Edge Functions
 
 ```bash
+# Desplegar PersonaNatural
 supabase functions deploy getPersonaNatural
+
+# Desplegar PersonaJuridica  
+supabase functions deploy getPersonaJuridica
 ```
 
 ### 6. Probar despliegue
 
 ```bash
-# Obtener URL y anon key de tu proyecto
+# Probar PersonaNatural
 curl "https://tu-proyecto.supabase.co/functions/v1/getPersonaNatural?dni=12345678" \
+  -H "Authorization: Bearer tu_anon_key"
+
+# Probar PersonaJuridica
+curl "https://tu-proyecto.supabase.co/functions/v1/getPersonaJuridica?ruc=20123456789" \
   -H "Authorization: Bearer tu_anon_key"
 ```
 
