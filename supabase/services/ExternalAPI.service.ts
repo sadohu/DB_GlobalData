@@ -1,15 +1,46 @@
 // ExternalAPI.service.ts - Servicio de API externa simplificado
 import type { PersonaNatural } from "../models/PersonaNatural.model.ts";
+import type { PersonaJuridica } from "../models/PersonaJuridica.model.ts";
 import { externalApiConfig } from "../shared/config.ts";
 
-// Interfaz para la respuesta de la API de Perú
-interface PeruApiResponse {
+// Interfaz para la respuesta de la API de Perú - DNI
+interface PeruApiDniResponse {
     success: boolean;
     dni: string;
     nombres: string;
     apellidoPaterno: string;
     apellidoMaterno: string;
     codVerifica?: string;
+}
+
+// Interfaz para la respuesta de la API de Perú - RUC
+interface PeruApiRucResponse {
+    ruc: string;
+    razonSocial: string;
+    nombreComercial?: string | null;
+    telefonos: string[];
+    tipo?: string | null;
+    estado: string;
+    condicion: string;
+    direccion: string;
+    departamento: string;
+    provincia: string;
+    distrito: string;
+    fechaInscripcion?: string | null;
+    sistEmsion?: string | null;
+    sistContabilidad?: string | null;
+    actExterior?: string | null;
+    actEconomicas: any[];
+    cpPago: any[];
+    sistElectronica: any[];
+    fechaEmisorFe?: string | null;
+    cpeElectronico: any[];
+    fechaPle?: string | null;
+    padrones: any[];
+    fechaBaja?: string | null;
+    profesion?: string | null;
+    ubigeo: string;
+    capital: string;
 }
 
 export class ExternalAPIService {
@@ -45,7 +76,7 @@ export class ExternalAPIService {
                 return null;
             }
 
-            const json: PeruApiResponse = await response.json();
+            const json: PeruApiDniResponse = await response.json();
 
             if (!json || json.success === false) {
                 console.log(`ℹ️ API Perú no encontró datos para DNI: ${dni}`);
@@ -72,6 +103,60 @@ export class ExternalAPIService {
     }
 
     /**
+     * Consultar datos de empresa por RUC en API externa de Perú
+     */
+    async fetchRUCFromPeruAPI(ruc: string): Promise<PersonaJuridica | null> {
+        try {
+            if (!this.peruApiToken) {
+                console.error('❌ Token de API Perú no configurado');
+                return null;
+            }
+
+            console.log(`🌐 Consultando API Perú para RUC: ${ruc}`);
+
+            const url = `${this.baseUrl}${externalApiConfig.rucEndpoint}${ruc}?token=${this.peruApiToken}`;
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                console.error(`❌ Error HTTP en API Perú: ${response.status} ${response.statusText}`);
+                return null;
+            }
+
+            const json: PeruApiRucResponse = await response.json();
+
+            if (!json || !json.ruc) {
+                console.log(`ℹ️ API Perú no encontró datos para RUC: ${ruc}`);
+                return null;
+            }
+
+            // Mapear datos de la API externa al modelo PersonaJuridica
+            const personaJuridica: PersonaJuridica = {
+                numero_documento: json.ruc,
+                razon_social: json.razonSocial,
+                nombre_comercial: json.nombreComercial || undefined,
+                tipo_documento: 'RUC',
+                tipo_empresa: json.tipo || undefined,
+                fecha_constitucion: json.fechaInscripcion ? new Date(json.fechaInscripcion) : undefined,
+                actividad_economica: json.actEconomicas && json.actEconomicas.length > 0 
+                    ? json.actEconomicas.map((act: any) => act.nombre || act.descripcion).join(', ')
+                    : undefined,
+                representante_legal: undefined, // No viene en la API
+                direccion_fiscal: json.direccion || undefined,
+                ubigeo: json.ubigeo || undefined,
+                telefono: json.telefonos && json.telefonos.length > 0 ? json.telefonos[0] : undefined,
+                estado_legal: json.estado || 'ACTIVO'
+            };
+
+            console.log(`✅ Datos obtenidos de API Perú para RUC: ${ruc}`);
+            return personaJuridica;
+
+        } catch (error) {
+            console.error(`❌ Error consultando API Perú para RUC ${ruc}:`, error);
+            return null;
+        }
+    }
+
+    /**
      * Validar si un DNI existe en API externa
      */
     async validateDNI(dni: string): Promise<boolean> {
@@ -84,6 +169,23 @@ export class ExternalAPIService {
 
         } catch (error) {
             console.error(`❌ Error validando DNI ${dni}:`, error);
+            return false;
+        }
+    }
+
+    /**
+     * Validar si un RUC existe en API externa
+     */
+    async validateRUC(ruc: string): Promise<boolean> {
+        try {
+            const empresa = await this.fetchRUCFromPeruAPI(ruc);
+            const isValid = empresa !== null;
+
+            console.log(`🔍 RUC ${ruc} ${isValid ? 'es válido' : 'no es válido'} según API Perú`);
+            return isValid;
+
+        } catch (error) {
+            console.error(`❌ Error validando RUC ${ruc}:`, error);
             return false;
         }
     }

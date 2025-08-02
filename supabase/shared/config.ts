@@ -10,7 +10,9 @@ export const supabaseConfig = {
 // Configuración de APIs externas
 export const externalApiConfig = {
   peruApiToken: Deno.env.get('APIS_PERU_TOKEN') ?? '',
-  peruApiBaseUrl: 'https://dniruc.apisperu.com/api/v1'
+  peruApiBaseUrl: 'https://dniruc.apisperu.com/api/v1',
+  dniEndpoint: '/dni/',
+  rucEndpoint: '/ruc/'
 };
 
 // Configuración de CORS
