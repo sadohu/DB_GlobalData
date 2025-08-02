@@ -1,17 +1,14 @@
-// Tipos simulados para desarrollo - Deno los reemplazará en producción
-export interface SupabaseClient {
-  from(table: string): any;
-  auth: any;
-  storage: any;
+// supabase.ts - Cliente Supabase para Edge Functions
+import { createClient as createSupabaseClient } from "jsr:@supabase/supabase-js@2";
+
+// Re-exportar la función createClient para uso en config.ts
+export function createClient(url: string, key: string, options?: any): any {
+  return createSupabaseClient(url, key, options);
 }
 
+// Tipos para compatibilidad
+export type SupabaseClient = any;
 export interface CreateClientOptions {
   auth?: any;
   global?: any;
-}
-
-// Función simulada para desarrollo
-export function createClient(url: string, key: string, options?: CreateClientOptions): SupabaseClient {
-  // Esta función será reemplazada por la real de JSR en runtime de Deno
-  throw new Error('Esta función debe ejecutarse en entorno Deno');
 }
